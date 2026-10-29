@@ -12,7 +12,7 @@ from zotero_notes import Client, ZoteroError, default_data_root, friendly_error
 from reading_sessions import timestamp, write_json
 
 
-VERSION = "0.3.1"
+VERSION = "0.4.0"
 PACKAGES = {"pypdf": "pypdf>=4,<7", "pypdfium2": "pypdfium2>=4,<6", "Pillow": "Pillow>=10,<13"}
 SCRIPTS = Path(__file__).resolve().parent
 
@@ -131,7 +131,7 @@ def main(argv=None):
         result = setup(root, not opts.no_install, opts.renderer, opts.skip_zotero)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["status"] in ("ready", "runtime_ready") else 2
-    if args.command in ("paths", "--help", "-h", "--version"):
+    if args.command in ("paths", "save-mode", "--help", "-h", "--version"):
         python = sys.executable
     else:
         python = ensure_runtime(root, renderer=args.command == "render")["python"]

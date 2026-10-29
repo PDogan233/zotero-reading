@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zotero-reading"
-version = "0.3.1"
+version = "0.4.0"
 description = "Conversation-driven reading reports as native Zotero notes"
 readme = "docs/PUBLIC_README.md"
 requires-python = ">=3.10"

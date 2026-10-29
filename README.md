@@ -1,12 +1,14 @@
 # Zotero Reading
 
-与本地阅读Agent讨论论文，在明确保存指令后将中文阅读报告写入Zotero原生子笔记。每篇文献维护一份专用报告，保留其他笔记。程序不自行调用模型API。
+与本地Agent阅读论文，默认在首次完整分析及每轮重要讨论后把报告保存为Zotero原生子笔记。有新解释或修正就更新同一份，没有实质变化不重复写；可随时选择只讨论或暂停。每篇维护一份专用报告，保留其他笔记。程序不自行调用模型API，不后台监听聊天。
 
 首轮分析和最终报告包含总结与动机、挑战与解决方法、优点与缺点三个模块。总结与动机明确说明前人做过什么、已有方法的具体不足、本文解决什么及实际验证范围。中文平实、直接、完整，保留必要解释，避免术语堆砌和刻意凝练。可联合阅读同文献下正文与补充PDF，证据保留原文关键摘录及独立页码链接。
 
+阅读日期下面先放一小段“核心贡献或理念”，说明论文最重要的想法或对话中用户最关心的点，附证据并区分论文事实与阅读归纳。不展示“讨论中”一类全局阶段标签，科学结论的必要限定仍保留。
+
 ## 安装与运行
 
-推荐独立zotero-reading-0.3.1-skill.zip：把实际文件路径交给本地Agent，说“根据这个ZIP中的zotero-reading/INSTALL.md，为当前Agent安装zotero-reading并完成初始化检查”。Agent解压、确认原生技能目录并安装；支持Windows上的Codex、Claude Code、DeepSeek Harness及已明确技能目录的其他本地Agent。专用.cmd只是可选入口。安装后说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。缺Python、Zotero设置或目录不明时Agent确认所需操作。详见随包INSTALL.md和README.md。
+推荐独立zotero-reading-0.4.0-skill.zip：把实际文件路径交给本地Agent，说“根据这个ZIP中的zotero-reading/INSTALL.md，为当前Agent安装zotero-reading并完成初始化检查”。Agent解压、确认原生技能目录并安装；支持Windows上的Codex、Claude Code、DeepSeek Harness及已明确技能目录的其他本地Agent。专用.cmd只是可选入口。安装后说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。缺Python、Zotero设置或目录不明时Agent确认所需操作。详见随包INSTALL.md和README.md。
 
 在[正式发行版](https://github.com/PDogan233/zotero-reading/releases/latest)下载完整skill.zip。仓库中的skills/zotero-reading是供构建的技能源目录，直接复制该子目录不包含完整运行时；安装使用Release附件。
 
@@ -24,7 +26,9 @@ zotero-reading start ABCDEFGH
 
 也可不安装，直接在源码目录运行`python scripts/zotero_notes.py`，传相同参数；Windows提供`zotero-report.ps1`。
 
-标题分析指令由Agent转换为find/start，再读PDF与规则；脚本本身不解析自然语言。讨论不会自动写入Zotero，用户明确保存后Agent准备报告并调用save。
+标题分析指令由Agent转换为find/start，再读PDF与规则。用户采用此默认流程后，Agent每轮重要讨论后整理本轮变化、检查证据并调用autosave，无需反复说保存；只讨论时用manual暂停。首次真实写入仍需Zotero授予权限，安装/更新不触发文献写入。脚本本身不解析或监听聊天。
+
+可以说“这篇先不保存，只讨论”“恢复这篇自动保存”或“以后都改为手动保存”。内部对应save-mode auto/manual，可对单篇--session选择；manual下明确保存本次仍可save。未读来源、未核对的草稿、未归纳重要问答会阻止自动保存，失败保留本地内容并说明原因。
 
 新建会话放在数据目录的`sessions/<主文献key>/`。`--data-dir`或环境变量`ZOTERO_READING_HOME`可指定数据目录；paths显示实际位置。pip安装版默认使用系统用户数据目录，源码版默认使用项目目录。
 

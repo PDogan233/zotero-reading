@@ -9,7 +9,7 @@
 
 ## 新电脑首次使用
 
-推荐仅发送独立`zotero-reading-0.3.1-skill.zip`。接收方在自己的本地Agent中说“请读取这个ZIP中的zotero-reading/INSTALL.md，按说明为当前Agent安装zotero-reading并完成初始化检查”，Agent负责解压、核实技能目录与安装。支持Codex、Claude Code、DeepSeek Harness及明确自定义目录的其他本地Agent；目录不明时确认，不默认装进Codex。专用.cmd仅作可选手动入口。不要只复制SKILL.md，完整指引随包附带。
+推荐仅发送独立`zotero-reading-0.4.0-skill.zip`。接收方在自己的本地Agent中说“请读取这个ZIP中的zotero-reading/INSTALL.md，按说明为当前Agent安装zotero-reading并完成初始化检查”，Agent负责解压、核实技能目录与安装。支持Codex、Claude Code、DeepSeek Harness及明确自定义目录的其他本地Agent；目录不明时确认，不默认装进Codex。专用.cmd仅作可选手动入口。不要只复制SKILL.md，完整指引随包附带。
 
 打开本地Agent的新会话，说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。Agent运行setup，寻找已有Python 3.10+、复用或隔离安装PDF依赖，检查Zotero 10+。只有缺Python、Zotero未打开/未启用本机通信、权限或选文有歧义时才需要用户操作。笔记写入授权留到实际保存时，不提前申请。
 
@@ -35,7 +35,9 @@ zotero-reading paths
 
 各电脑的数据目录可以不同。例如另一电脑已改到Documents/Codex/ZoteroReading，就继续沿用，不因更新改回LocalAppData。数据目录无法创建/重命名时应先核对实际Agent权限，并确认可写位置；设置环境变量不会自动搬迁已有记录或扩大沙箱权限。
 
-更新后不必强制关闭原窗口：让Agent重新读取安装目录的SKILL.md、references/reading-workflow.md及报告格式说明，再接续本地讨论。客户端不能刷新/发现技能时才新开会话或重启；不同客户端的自动发现不能替代实际重读文件。旧报告不会自动按新规则重写，之后若用户要求修订仍先准备本地预览，明确保存才写Zotero。
+更新后不必强制关闭原窗口：让Agent重新读取安装目录的SKILL.md、references/reading-workflow.md及报告格式说明，再接续本地讨论。客户端不能刷新/发现技能时才新开会话或重启；自动发现不能替代实际重读。0.4.0默认每轮重要论文讨论后保存，可选择只讨论/暂停；升级本身不批量改写旧报告，后续实际阅读更新再补核心理念和新格式。
+
+全局保存偏好在.local/reading-preferences.json，单篇选择在session.json；需要时按本人意愿另行迁移，不与授权混用，也不将他人的偏好当自己的写入授权。旧report.saved.json保持旧渲染以便校验，不为去阶段标记直接改快照。
 
 ## 同一Zotero账户换电脑
 
@@ -49,7 +51,7 @@ zotero-reading paths
 2. 旧文件夹命名不统一时先`zotero-reading normalize-sessions --dry-run`检查，再运行normalize-sessions。它按主文献key重命名，保留内容，遇到同文献多个目录则停止。
 3. 对每个需要接续的会话先运行`zotero-reading rebind ABCDEFGH --dry-run`，再运行`zotero-reading rebind ABCDEFGH`。
 4. rebind检查原条目/PDF key、标题/DOI、所有PDF指纹以及已有报告正文；只刷新本地服务ID、文件路径与回执，不写入Zotero。内容或身份不符时停止，不自动猜测。
-5. resume继续讨论；用户明确保存时覆盖原专用阅读笔记，其他笔记保持原样。
+5. resume继续讨论；按用户采用的保存方式维护同一份专用笔记，自动模式每轮重要进展后保存，manual/暂停时仅明确保存本次；其他笔记保持原样。
 
 ## 不同账户
 

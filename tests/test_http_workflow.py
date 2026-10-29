@@ -114,6 +114,7 @@ class HttpWorkflowTests(unittest.TestCase):
                 report_path = directory / "report.json"
                 prepared = read_json(report_path)
                 prepared["draft"] = False
+                prepared["core_idea"] = {"text": "用于协议测试的核心理念。", "sources": [{"attachment_key": "6N5VPAT4", "page": 1}]}
                 for source in prepared["paper"]["attachments"]:
                     source["reading_status"] = "read"
                 prepared["sections"][0]["paragraphs"][0]["text"] = "隔离协议测试内容。"

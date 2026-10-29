@@ -35,6 +35,7 @@ class PortabilityTests(unittest.TestCase):
         directory = Path(start_session(self.client, self.root / "sessions", PARENT)["session"])
         prepared = read_json(directory / "report.json")
         prepared["draft"] = False
+        prepared["core_idea"] = {"text": "用于迁移测试的已核实核心理念。", "sources": [{"attachment_key": MAIN, "page": 1}]}
         for source in prepared["paper"]["attachments"]:
             source["reading_status"] = "read"
         prepared["sections"][0]["paragraphs"][0]["text"] = "先前已核实的阅读报告"

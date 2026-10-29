@@ -33,7 +33,7 @@ def build(output, repository=UPDATE_REPOSITORY):
             archive.write(path, prefix + "/" + path.relative_to(ROOT).as_posix())
         public_readme = (ROOT / "docs/PUBLIC_README.md").read_text(encoding="utf-8")
         archive.writestr(prefix + "/README.md", public_readme.replace("](MIGRATION.md)", "](docs/MIGRATION.md)").replace("](RELEASING.md)", "](docs/RELEASING.md)").replace("](../prompts/", "](prompts/"))
-        archive.writestr(prefix + "/AGENTS.md", "论文阅读任务先读prompts/reading-workflow.md和skills/zotero-reading/SKILL.md。首轮分析及报告覆盖总结与动机、挑战与解决方法、优点与缺点；动机交代前人工作、已有不足及本文解决内容。中文平实、完整，不堆术语或过度凝练，保留原文证据与限定。用户明确保存后才写Zotero；每篇文献维护一份专用笔记，保留其他笔记。\n")
+        archive.writestr(prefix + "/AGENTS.md", "论文阅读先读prompts/reading-workflow.md和skills/zotero-reading/SKILL.md。默认对接受该流程的用户每轮重要讨论后autosave，尊重仅讨论/暂停，安装更新不写文献笔记。核心理念放阅读日期下面，正文覆盖总结与动机、挑战与解决方法、优点与缺点；动机交代前人工作、不足及本文解决内容。中文平实完整，保留证据限定，不显示全局阶段标签。未读来源、草稿、所有权、并发和备份检查继续生效；每篇只维护一份专用笔记，保留其他笔记及旧保存快照。\n")
     payload = {"SKILL.md": (skill_root / "SKILL.md").read_text(encoding="utf-8").replace(
         "](../../prompts/reading-workflow.md)", "](references/reading-workflow.md)").replace(
         "](../../docs/MIGRATION.md)", "](references/MIGRATION.md)").encode("utf-8"),

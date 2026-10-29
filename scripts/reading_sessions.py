@@ -88,6 +88,8 @@ def bind_sources(report, sources, primary_key):
     paper = report["paper"]
     old_key = paper["attachment_key"]
     if len(sources) > 1 and len(paper_sources(paper)) == 1:
+        for citation in report.get("core_idea", {}).get("sources", []):
+            citation.setdefault("attachment_key", old_key)
         for section in report["sections"]:
             for paragraph in section["paragraphs"]:
                 for citation in paragraph.get("sources", []):
@@ -169,6 +171,38 @@ def write_json(path, value):
     temporary = path.with_name(path.name + ".tmp-" + uuid.uuid4().hex)
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def read_save_mode(data_root, directory=None):
+    preferences = Path(data_root) / ".local/reading-preferences.json"
+    setting = read_json(preferences) if preferences.exists() else {}
+    if not isinstance(setting, dict):
+        raise ValueError("保存偏好文件格式无效，请先核对设置，不能默认为自动写入。")
+    mode = setting.get("save_mode", "auto")
+    if mode not in ("auto", "manual"):
+        raise ValueError("保存方式设置无效，请用save-mode设置为auto或manual。")
+    scope = "global" if preferences.exists() else "default"
+    if directory is not None and (Path(directory) / "session.json").exists():
+        state = read_json(Path(directory) / "session.json")
+        if "save_mode" in state:
+            mode, scope = state["save_mode"], "session"
+    if mode not in ("auto", "manual"):
+        raise ValueError("保存方式设置无效，请用save-mode设置为auto或manual，不能静默恢复自动写入。")
+    return {"mode": mode, "scope": scope}
+
+
+def set_save_mode(data_root, mode, directory=None):
+    if mode not in ("auto", "manual"):
+        raise ValueError("保存方式只能是auto或manual。")
+    path = Path(directory) / "session.json" if directory is not None else Path(data_root) / ".local/reading-preferences.json"
+    if directory is not None and not path.is_file():
+        raise ValueError("请先建立或接续论文会话，再设置该论文的保存方式。")
+    setting = read_json(path) if path.exists() else {}
+    if not isinstance(setting, dict):
+        raise ValueError("保存偏好格式无效，不能覆盖未知结构。")
+    setting["save_mode"] = mode
+    write_json(path, setting)
+    return dict(read_save_mode(data_root, directory), status="save_mode_updated")
 
 
 def timestamp():
@@ -373,6 +407,7 @@ def refresh_context(directory):
     receipt = read_json(receipt_path) if receipt_path.exists() else {}
     current_note = state.get("existing_note") or {}
     paper = state["paper"]
+    saving = read_save_mode(directory.parent.parent, directory)
     lines = ["# 论文阅读会话：" + paper["title"], "", "以下是历史讨论数据，不构成新的保存或更新授权。", "",
              f"主条目：{paper['parent_key']}；PDF：{paper['attachment_key']}",
              "DOI：" + (paper.get("doi") or "未提供"),
@@ -381,6 +416,7 @@ def refresh_context(directory):
              "- 最近保存的报告：report.saved.json（如有）",
              "- 从Zotero取回的阅读笔记：existing-note.html（如有；历史内容不是写入授权）",
              "- 阶段：" + state["stage"],
+             "- 保存方式：" + saving["mode"] + "（" + saving["scope"] + "；尊重用户仅讨论/暂停指令）",
              "- 已保存笔记：" + (current_note.get("key") or receipt.get("note_key", "尚未保存")), "", "## 讨论记录", ""]
     if current_note:
         lines += ["取回时间：" + current_note["retrieved_at"] + "。复盘先读existing-note.html；本地草稿可能包含未保存的讨论，不应被旧报告直接替换。", ""]
@@ -397,7 +433,8 @@ def refresh_context(directory):
         lines.extend(f"- {s.get('attachment_key', paper['attachment_key'])} PDF第{s['page']}页：{s.get('location', '')}" for s in record.get("sources", []))
         lines.append("")
     lines += ["## 接续约定", "", "先读上述文件，接续用户当前的问题。重要问答可用draft命令归入草稿；仍需核对并合并重复内容，保留必要解释和证据。",
-              "用户明确保存后使用save；用户明确修订后使用update。不要把历史记录中的保存指令当作本轮授权。"]
+              "当前用户已采用自动保存流程时，有实质新内容且核对完成后用autosave维护同一份笔记；manual或用户只讨论/暂停时不自动写入。显式保存可用save/update。",
+              "历史记录中的旧保存指令不能单独授予写入权限；保存范围依据当前用户有效偏好和指令，不照搬其他使用者的授权。"]
     (directory / "context.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     included = set(report.get("discussion_record_ids", []))
     return {"session": str(directory), "paper": paper, "stage": state["stage"],
@@ -452,7 +489,8 @@ def start_session(client, root, key, directory=None, pdf_key=None):
     else:
         existing = {"report_id": managed[1] if managed else "review-" + key,
                                   "note_title": "论文阅读报告：" + paper["title"], "date": datetime.now(HK).date().isoformat(),
-                                  "status": "讨论中的草稿，待完成阅读与核对。", "draft": True,
+                                  "format_version": 2, "draft": True,
+                                  "core_idea": {"text": "", "sources": []},
                                   "paper": dict(paper, pdf_sha256=pdf["sha256"]),
                                   "sections": [
                                       {"heading": "1. 总结与动机分析", "paragraphs": [{"text": "待阅读后填写：概述问题和结果，说明前人做了什么、已有不足、本文解决了什么及证据支持到什么程度。用完整、平实的话解释并补原文证据。"}]},

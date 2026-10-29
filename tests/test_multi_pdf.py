@@ -56,6 +56,7 @@ class JointReadingTests(unittest.TestCase):
     def prepared(self, directory):
         prepared = read_json(directory / "report.json")
         prepared["draft"] = False
+        prepared["core_idea"] = {"text": "正文与补充材料共同支持的测试理念。", "sources": [{"attachment_key": MAIN, "page": 2}]}
         for source in prepared["paper"]["attachments"]:
             source["reading_status"] = "read"
         prepared["sections"][0]["paragraphs"][0] = {"text": "正文与补充材料共同支持的测试结论。", "sources": [
@@ -94,6 +95,7 @@ class JointReadingTests(unittest.TestCase):
         prepared = self.prepared(self.start())
         html = render_note(prepared)
         self.assertEqual(source_links(html), [f"zotero://open-pdf/library/items/{MAIN}?page=2",
+                                               f"zotero://open-pdf/library/items/{MAIN}?page=2",
                                                f"zotero://open-pdf/library/items/{SUPPLEMENT}?page=4"])
         self.assertIn("正文·图1", html)
         self.assertIn("补充材料·表S1", html)

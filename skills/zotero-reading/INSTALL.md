@@ -56,6 +56,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File '包根绝对路径\inst
 
 > 根据zotero-reading帮我看《论文标题》并生成阅读报告。
 
-若对方同一句已经要求安装后阅读某篇论文，环境就绪后继续读取[SKILL.md](SKILL.md)完成阅读，不重复询问是否开始。只在明确要求保存到Zotero时才写笔记。
+若对方同一句已经要求安装后阅读某篇论文，环境就绪后读取[SKILL.md](SKILL.md)完成阅读，不重复询问是否开始。0.4.0默认每轮重要讨论后保存，首次使用说明该行为并尊重只讨论/暂停的选择；已有明确长期授权不逐轮询问。安装、介绍或Skill升级本身不写论文笔记，不将原开发者的授权套用给接收方。
 
 目录机制依据：[DeepSeek Harness本地技能provider](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md)、[Codex](https://learn.chatgpt.com/docs/build-skills)、[Claude Code](https://code.claude.com/docs/en/skills)。更详细的用户说明见[安装使用指南](references/installation.md)。

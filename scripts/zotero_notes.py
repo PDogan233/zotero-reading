@@ -1,7 +1,7 @@
-"""Prepare and explicitly save conversation-authored reports as Zotero notes.
+"""Prepare reports and save meaningful discussion updates as Zotero notes.
 
 Python standard library only. No database writes and no model/API subscription.
-Only `save` and `update` can request authorization or change the Zotero library.
+Only `save`, `update`, and Agent-invoked `autosave` can change the Zotero library.
 """
 
 import argparse
@@ -19,8 +19,8 @@ import urllib.request
 
 from reading_sessions import (RECORD_KINDS, ROLE_LABELS, citation_source, draft_from_records, item_key, managed_report,
                               capture_existing_note, normalized_doi, normalize_sessions, paper_children, paper_sources, pdf_snapshot, query_papers, session_sources,
-                              read_json, record_discussion, refresh_context, session_path,
-                              start_session, timestamp, write_json)
+                              read_json, read_save_mode, record_discussion, refresh_context, session_path,
+                              set_save_mode, start_session, timestamp, write_json)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -92,7 +92,9 @@ def render_paragraph(paragraph, paper):
 
 def validate_report(report, require_ready=False):
     if require_ready and report.get("draft"):
-        raise ValueError("报告仍为草稿。请完成阅读与证据核对，将draft设为false后再按用户指令保存。")
+        raise ValueError("本轮报告草稿尚未核对完成。请完成阅读与证据检查，将draft设为false后再保存。")
+    if type(report.get("format_version", 1)) is not int or report.get("format_version", 1) not in (1, 2):
+        raise ValueError("不支持的报告格式版本。")
     paper = report["paper"]
     for name in ("parent_key", "attachment_key"):
         if not KEY_PATTERN.fullmatch(paper[name]):
@@ -122,7 +124,7 @@ def validate_report(report, require_ready=False):
             raise ValueError("PDF page_count must be a positive integer")
         if attachment.get("role", "main") not in ROLE_LABELS:
             raise ValueError("无效的PDF角色。")
-        if len(attachments) > 1 and require_ready:
+        if require_ready and (len(attachments) > 1 or report.get("format_version", 1) >= 2 or "core_idea" in report):
             status = attachment.get("reading_status", "pending")
             if status == "excluded":
                 if not attachment.get("exclusion_reason"):
@@ -132,10 +134,19 @@ def validate_report(report, require_ready=False):
                 if not duplicate or duplicate["key"] == attachment["key"] or not attachment.get("pdf_sha256") or duplicate.get("pdf_sha256") != attachment["pdf_sha256"] or duplicate.get("reading_status") != "read":
                     raise ValueError("重复PDF必须指向已读且指纹相同的来源。")
             elif status != "read":
-                raise ValueError("联合阅读还有未读PDF。请完成阅读，或明确说明排除原因后再保存。")
+                raise ValueError("报告来源中还有未读PDF。请完成阅读，或明确说明排除原因后再保存。")
     if not report["sections"]:
         raise ValueError("Report must contain sections")
-    for section in report["sections"]:
+    core = report.get("core_idea")
+    if core is not None and (not isinstance(core, dict) or not isinstance(core.get("text"), str)):
+        raise ValueError("core_idea必须是包含text的段落对象。")
+    modern = report.get("format_version", 1) >= 2 or "core_idea" in report
+    if require_ready and modern and (not core or not core["text"].strip()):
+        raise ValueError("请先在core_idea中填写本轮核对过的核心贡献或理念。")
+    if require_ready and core and core["text"].strip() and not (core.get("sources") or core.get("external_sources")):
+        raise ValueError("核心贡献或理念需要对应论文或已查证外部材料的来源定位。")
+    sections = report["sections"] + ([{"heading": "核心贡献或理念", "paragraphs": [core]}] if core and core["text"].strip() else [])
+    for section in sections:
         if not section["heading"] or not section["paragraphs"]:
             raise ValueError("Every section needs a heading and paragraphs")
         for paragraph in section["paragraphs"]:
@@ -176,8 +187,13 @@ def render_note(report):
     paper = report["paper"]
     parts = [f"<h1>{escape(report['note_title'])}</h1>",
              f"<p>论文：{escape(paper['title'])}</p>",
-             f"<p>DOI：{escape(paper.get('doi') or '未提供')}；阅读日期：{escape(report['date'])}</p>",
-             f"<p>{escape(report['status'])}</p>"]
+             f"<p>DOI：{escape(paper.get('doi') or '未提供')}；阅读日期：{escape(report['date'])}</p>"]
+    if report.get("format_version", 1) < 2 and "core_idea" not in report:
+        # Keep saved legacy snapshots byte-compatible for resume/baseline checks.
+        parts.append(f"<p>{escape(report.get('status', ''))}</p>")
+    core = report.get("core_idea")
+    if core and core["text"].strip():
+        parts += ["<h2>核心贡献或理念</h2>", render_paragraph(core, paper)]
     if len(paper_sources(paper)) > 1:
         parts.append("<h2>阅读材料</h2>")
         for source in paper_sources(paper):
@@ -519,7 +535,25 @@ def ensure_qa_merged(report, report_path):
     included = set(report.get("discussion_record_ids", []))
     if any(record["kind"] == "qa" and record["important"] and record["id"] not in included
            for record in read_json(records_path)):
-        raise ValueError("有重要问答尚未归纳到草稿。请先运行draft，再核对和压缩报告，避免遗漏讨论成果。")
+        raise ValueError("有重要问答尚未归纳到报告。请先运行draft，再核对并合并重复内容，保留必要解释。")
+
+
+def autosave_preflight(report, report_path, data_root):
+    saving = read_save_mode(data_root, Path(report_path).parent)
+    if saving["mode"] != "auto":
+        return {"status": "autosave_disabled", "save_mode": saving, "action": "该范围仅讨论，不自动写入；显式save仍可保存本次。"}
+    try:
+        validate_report(report, require_ready=True)
+        if not report.get("core_idea") or not report["core_idea"]["text"].strip():
+            raise ValueError("自动保存前请补充core_idea核心贡献或理念及来源。")
+        if not (report["core_idea"].get("sources") or report["core_idea"].get("external_sources")):
+            raise ValueError("核心贡献或理念需要来源定位。")
+        if any(paragraph["text"].startswith("待阅读后填写：") for section in report["sections"] for paragraph in section["paragraphs"]):
+            raise ValueError("报告还有未完成的模板段落，请完成本轮分析后再自动保存。")
+        ensure_qa_merged(report, report_path)
+    except ValueError as error:
+        return {"status": "autosave_deferred", "action": str(error)}
+    return None
 
 
 def friendly_error(error):
@@ -554,11 +588,14 @@ def main():
     global AUTH_FILE
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", action="version", version="zotero-reading 0.3.1")
+    parser.add_argument("--version", action="version", version="zotero-reading 0.4.0")
     parser.add_argument("--data-dir", type=Path, help="会话和本机授权数据目录；也可设置ZOTERO_READING_HOME")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("probe")
     sub.add_parser("paths", help="查看当前数据目录，不访问Zotero")
+    mode = sub.add_parser("save-mode", help="查看/设置默认或指定论文的auto/manual保存方式，不访问Zotero")
+    mode.add_argument("mode", choices=("auto", "manual"), nargs="?")
+    mode.add_argument("--session", help="仅设置该论文；省略时设置当前数据目录的默认方式")
     normalize = sub.add_parser("normalize-sessions", help="将旧会话目录统一为主文献key")
     normalize.add_argument("--dry-run", action="store_true")
     rebind = sub.add_parser("rebind", help="同文库同key换机后核对PDF并刷新本地绑定")
@@ -593,7 +630,7 @@ def main():
     record.add_argument("--evidence-kind", choices=("paper", "background", "inference", "user"), default="paper")
     draft = sub.add_parser("draft", help="将尚未归纳的重要问答放入待审核草稿")
     draft.add_argument("session")
-    for name in ("preview", "save", "update"):
+    for name in ("preview", "save", "update", "autosave"):
         command = sub.add_parser(name)
         command.add_argument("report", type=Path)
         if name == "update":
@@ -602,6 +639,11 @@ def main():
     data_root = args.data_dir.expanduser().resolve() if args.data_dir else default_data_root()
     AUTH_FILE = data_root / ".local" / "zotero-auth.json"
     sessions_root = data_root / "sessions"
+    if args.command == "save-mode":
+        directory = session_path(sessions_root, args.session) if args.session else None
+        result = set_save_mode(data_root, args.mode, directory) if args.mode else read_save_mode(data_root, directory)
+        print(json.dumps(result, ensure_ascii=False))
+        return
     if args.command == "paths":
         print(json.dumps({"data_dir": str(data_root), "sessions": str(sessions_root)}, ensure_ascii=False))
         return
@@ -655,6 +697,11 @@ def main():
                           + "</body></html>", encoding="utf-8")
         print(json.dumps({"status": "preview_only", "path": str(target.resolve())}, ensure_ascii=False))
         return
+    if args.command == "autosave":
+        decision = autosave_preflight(report, args.report, data_root)
+        if decision:
+            print(json.dumps(decision, ensure_ascii=False))
+            return
     validate_report(report, require_ready=True)
     ensure_qa_merged(report, args.report)
     client = Client()
@@ -677,6 +724,8 @@ def main():
     dry_run = getattr(args, "dry_run", False)
     result = publish_report(client, report, args.report, dry_run=dry_run,
                             require_existing=args.command == "update")
+    if args.command == "autosave":
+        result["automatic"] = True
     if not dry_run:
         write_json(args.report, report)
         store_receipt(args.report, report, result)

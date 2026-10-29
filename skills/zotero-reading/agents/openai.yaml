@@ -1,4 +1,4 @@
 interface:
   display_name: "Zotero 论文阅读"
-  short_description: "首次按需初始化，联合阅读论文并生成含原文摘录的中文报告，明确保存后写Zotero笔记"
+  short_description: "首次按需初始化，以核心理念开篇分析论文，默认随重要讨论更新同一份Zotero笔记，可暂停"
   default_prompt: "根据 $zotero-reading 帮我阅读指定论文并生成中文阅读报告；首次使用时完成所需初始化。"
