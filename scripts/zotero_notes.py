@@ -554,7 +554,7 @@ def main():
     global AUTH_FILE
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", action="version", version="zotero-reading 0.3.0")
+    parser.add_argument("--version", action="version", version="zotero-reading 0.3.1")
     parser.add_argument("--data-dir", type=Path, help="会话和本机授权数据目录；也可设置ZOTERO_READING_HOME")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("probe")

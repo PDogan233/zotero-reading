@@ -11,7 +11,7 @@
 ## 发布一个版本
 
 1. 修改源码中的提示词、脚本或规则。阅读规则原文件为prompts/reading-workflow.md；构建会将其放入Skill的references，不手工只改ZIP中的一份。
-2. 同时更新pyproject.toml版本、scripts/bootstrap.py的VERSION和scripts/zotero_notes.py的--version，并同步当前分享包版本介绍；首次实际发布时更新文档中“尚未发布”的状态，历史迁移示例可保留。使用major.minor.patch，新功能用次版本、修复用补丁版本；Release标签与包内版本必须一致，例如v0.3.0。不要用已发布的同一版本号替换不同内容，更新器不会重装同版。
+2. 同时更新pyproject.toml版本、scripts/bootstrap.py的VERSION和scripts/zotero_notes.py的--version，并同步当前分享包版本介绍；首次实际发布时更新文档中“尚未发布”的状态，历史迁移示例可保留。使用major.minor.patch，新功能用次版本、修复用补丁版本；Release标签与包内版本必须一致，例如v0.3.1。不要用已发布的同一版本号替换不同内容，更新器不会重装同版。
 3. 在Windows Python 3.10+环境中运行测试和构建（下方python替换为实际可用解释器）：
 
    ```powershell
@@ -20,14 +20,14 @@
    ```
 
    PDF抽取/渲染相关测试需要对应开发依赖；普通测试不操作真实Zotero。需要Skill官方校验时，在开发环境中使用skill-creator的quick_validate.py；它不是接收方运行依赖。当前默认更新仓库为PDogan233/zotero-reading；fork发布时用--repository明确指定自己的公开仓库。
-4. 核对dist/zotero-reading-0.3.0-skill.zip、source.zip（文件名依实际版本），确认版本、文件清单和数据排除。GitHub对新上传的附件计算SHA256 digest，更新器要求此字段；ZIP内另有逐文件manifest。不要上传私人项目文件夹或Python运行环境。
-5. 推送源码和与该提交对应的v0.3.0标签。GitHub的Releases页面创建对应标签的正式发行版，更新说明写清行为变化、是否涉及接收方操作和兼容性。不要勾选预发布；如有多个版本，明确将目标正式版设为Latest。
-6. 上传精确命名的zotero-reading-0.3.0-skill.zip作为Release附件，另可上传source.zip供开发者使用。GitHub自动生成的Source code ZIP不能代替独立Skill ZIP。首次上传、附件完成前可先保存为草稿，附件齐全后再发布。
+4. 核对dist/zotero-reading-0.3.1-skill.zip、source.zip（文件名依实际版本），确认版本、文件清单和数据排除。GitHub对新上传的附件计算SHA256 digest，更新器要求此字段；ZIP内另有逐文件manifest。不要上传私人项目文件夹或Python运行环境。
+5. 推送源码和与该提交对应的v0.3.1标签。GitHub的Releases页面创建对应标签的正式发行版，更新说明写清行为变化、是否涉及接收方操作和兼容性。不要勾选预发布；如有多个版本，明确将目标正式版设为Latest。
+6. 上传精确命名的zotero-reading-0.3.1-skill.zip作为Release附件，另可上传source.zip供开发者使用。GitHub自动生成的Source code ZIP不能代替独立Skill ZIP。首次上传、附件完成前可先保存为草稿，附件齐全后再发布。
 7. 发布后先在临时安装目录验收skill-update check/apply，核对从旧版升级、入口版本、备份、自定义数据目录和本地修改阻止行为。实际GitHub下载验收通过后，才告诉接收方已可在线更新。
 
 ## 已安装电脑的操作
 
-- 当前另一台电脑若为0.2.1，先把完整0.3.0 Skill ZIP交给它的Agent，按INSTALL.md升级一次。保留它已设置的ZOTERO_READING_HOME；有本地修改时先确认。
+- 当前另一台电脑若为0.2.1，先把完整0.3.1 Skill ZIP交给它的Agent，按INSTALL.md升级一次。保留它已设置的ZOTERO_READING_HOME；有本地修改时先确认。
 - 之后说“检查zotero-reading有没有新版本”只查询；说“把zotero-reading更新到最新正式版”才执行升级。
 - 所有电脑在各自执行更新后跟上新版本。本版没有自动更新、后台任务或远程推送机制；无须接收方安装Git。
 

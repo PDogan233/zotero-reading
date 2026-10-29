@@ -396,7 +396,7 @@ def refresh_context(directory):
         lines += ["", "证据类型：" + record["evidence_kind"]]
         lines.extend(f"- {s.get('attachment_key', paper['attachment_key'])} PDF第{s['page']}页：{s.get('location', '')}" for s in record.get("sources", []))
         lines.append("")
-    lines += ["## 接续约定", "", "先读上述文件，接续用户当前的问题。重要问答可用draft命令归入草稿；仍需核对、去重和压缩。",
+    lines += ["## 接续约定", "", "先读上述文件，接续用户当前的问题。重要问答可用draft命令归入草稿；仍需核对并合并重复内容，保留必要解释和证据。",
               "用户明确保存后使用save；用户明确修订后使用update。不要把历史记录中的保存指令当作本轮授权。"]
     (directory / "context.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     included = set(report.get("discussion_record_ids", []))
@@ -454,7 +454,11 @@ def start_session(client, root, key, directory=None, pdf_key=None):
                                   "note_title": "论文阅读报告：" + paper["title"], "date": datetime.now(HK).date().isoformat(),
                                   "status": "讨论中的草稿，待完成阅读与核对。", "draft": True,
                                   "paper": dict(paper, pdf_sha256=pdf["sha256"]),
-                                  "sections": [{"heading": "摘要与贡献", "paragraphs": [{"text": "待阅读后填写。"}]}], "qa": []}
+                                  "sections": [
+                                      {"heading": "1. 总结与动机分析", "paragraphs": [{"text": "待阅读后填写：概述问题和结果，说明前人做了什么、已有不足、本文解决了什么及证据支持到什么程度。用完整、平实的话解释并补原文证据。"}]},
+                                      {"heading": "2. 挑战与解决方法", "paragraphs": [{"text": "待阅读后填写：说明具体挑战、对应方法及其机制和条件，补充支持这些解释的证据。"}]},
+                                      {"heading": "3. 优点与缺点分析", "paragraphs": [{"text": "待阅读后填写：说明有证据的优点与局限，以及它们如何影响结论；不虚构优缺点。"}]}
+                                  ], "qa": []}
     if len(sources) > 1 or not existing_path.exists():
         if len(sources) > 1 and len(paper_sources(existing["paper"])) == 1:
             bind_legacy_records(target, existing["paper"]["attachment_key"])

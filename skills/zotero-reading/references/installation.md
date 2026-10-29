@@ -2,7 +2,7 @@
 
 ## 发给别人什么
 
-只发送`zotero-reading-0.3.0-skill.zip`。它包含INSTALL.md、Skill说明、程序、PDF工具、Windows入口、通用安装器、按指令更新器和参考说明，无需再发源码包、Python wheel或本项目文件夹。
+只发送`zotero-reading-0.3.1-skill.zip`。它包含INSTALL.md、Skill说明、程序、PDF工具、Windows入口、通用安装器、按指令更新器和参考说明，无需再发源码包、Python wheel或本项目文件夹。
 
 ZIP不含论文、私人会话、Zotero库、授权、Python或第三方依赖。接收方使用自己的本机Zotero文库和Agent；无需提供新的模型API Key。
 
@@ -10,7 +10,7 @@ ZIP不含论文、私人会话、Zotero库、授权、Python或第三方依赖�
 
 把ZIP的实际本机路径交给当前Agent，例如直接说：
 
-> 请读取 D:\Downloads\zotero-reading-0.3.0-skill.zip 中的 zotero-reading/INSTALL.md，按说明为当前Agent安装zotero-reading，并完成初始化检查；有不确定的地方先向我确认。
+> 请读取 D:\Downloads\zotero-reading-0.3.1-skill.zip 中的 zotero-reading/INSTALL.md，按说明为当前Agent安装zotero-reading，并完成初始化检查；有不确定的地方先向我确认。
 
 路径替换为对方电脑的实际位置；若Agent支持本地附件，也可附上ZIP并说“根据附件中的INSTALL.md安装zotero-reading”。Agent负责安全解压、确认自己的原生技能目录、运行安装器和setup。用户无需选择或双击专用脚本。
 
@@ -40,7 +40,7 @@ Agent先运行setup并继续选文，用户不必手写部署命令：
 - 用户需打开Zotero 10+，在设置→高级中启用“允许此计算机上的其他应用程序与Zotero通信”，并确保PDF已下载。若这些尚未完成，Agent指出缺少哪一步。
 - Agent沙箱可能单独要求允许localhost访问；这不是Zotero的笔记写入授权。
 
-报告默认中文，含总结与动机、挑战与解决方法、优缺点，重要引用附原文关键摘录和PDF页码链接。标题有多个匹配、PDF缺失或正文版本不清楚时，Agent向用户确认。
+报告默认中文，含总结与动机、挑战与解决方法、优缺点。总结与动机讲清前人已经做了什么、已有不足、本文解决了什么及证据支持的范围。语言平实、直接、完整，必要时展开解释，不把报告压成术语和口号；重要引用仍附原文关键摘录和PDF页码链接。标题有多个匹配、PDF缺失或正文版本不清楚时，Agent向用户确认。
 
 ## 讨论与保存
 
@@ -56,7 +56,7 @@ Agent先运行setup并继续选文，用户不必手写部署命令：
 
 0.3.0起可以说“检查zotero-reading有没有新版本”或“把zotero-reading更新到最新正式版”，分别只查询和实际升级。详细规则见[更新说明](updates.md)。默认公开来源为[PDogan233/zotero-reading正式发行版](https://github.com/PDogan233/zotero-reading/releases/latest)，没有可用正式附件时会说明原因并保留旧版。旧0.2.1需先按完整0.3.0包的INSTALL.md升级一次。正常阅读不自动检查或安装新版。
 
-更新保留原数据目录、讨论及Zotero笔记；本地修改先停，未获明确同意不覆盖。更新完成刷新技能或开新会话。各Agent的独立安装分别更新，不自动扫描其他客户端。
+更新保留原数据目录、讨论及Zotero笔记；本地修改先停，未获明确同意不覆盖。可以直接说“从GitHub更新zotero-reading到最新正式版”。更新完成后，让Agent在当前对话重新读取新SKILL.md和阅读规则再继续；客户端未发现或无法刷新时再新开会话。各Agent的独立安装分别更新，不自动扫描其他客户端。
 
 ## 数据在哪里
 

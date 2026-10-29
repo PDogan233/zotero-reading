@@ -345,7 +345,7 @@ def apply(directory, data_root, repository=None, overwrite_local=False, github=N
                         action=f"更新失败，已恢复旧版：{type(error).__name__}。旧版及本地修改已保留。")
         return dict(result, status="updated", installed_version=new["version"], backup=str(backup),
                     data_dir=str(data_root), reload_required=True,
-                    action="技能文件已更新；请刷新技能或新开会话。下一次阅读先运行setup，原报告不会自动重写。")
+                    action="技能文件已更新；可在当前会话重新读取新版SKILL.md及reading-workflow.md后继续。客户端未发现更新时再刷新技能或新开会话；下一次阅读先setup，原报告不会自动重写。")
 
 
 def main(argv=None, data_root=None, skill_directory=None):

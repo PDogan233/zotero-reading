@@ -2,11 +2,11 @@
 
 与本地阅读Agent讨论论文，在明确保存指令后将中文阅读报告写入Zotero原生子笔记。每篇文献维护一份专用报告，保留其他笔记。程序不自行调用模型API。
 
-首轮分析和最终报告包含总结与动机、挑战与解决方法、优点与缺点三个模块。可联合阅读同文献下正文与补充PDF，证据链接分别指向各文件的页码。
+首轮分析和最终报告包含总结与动机、挑战与解决方法、优点与缺点三个模块。总结与动机明确说明前人做过什么、已有方法的具体不足、本文解决什么及实际验证范围。中文平实、直接、完整，保留必要解释，避免术语堆砌和刻意凝练。可联合阅读同文献下正文与补充PDF，证据保留原文关键摘录及独立页码链接。
 
 ## 安装与运行
 
-推荐独立zotero-reading-0.3.0-skill.zip：把实际文件路径交给本地Agent，说“根据这个ZIP中的zotero-reading/INSTALL.md，为当前Agent安装zotero-reading并完成初始化检查”。Agent解压、确认原生技能目录并安装；支持Windows上的Codex、Claude Code、DeepSeek Harness及已明确技能目录的其他本地Agent。专用.cmd只是可选入口。安装后说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。缺Python、Zotero设置或目录不明时Agent确认所需操作。详见随包INSTALL.md和README.md。
+推荐独立zotero-reading-0.3.1-skill.zip：把实际文件路径交给本地Agent，说“根据这个ZIP中的zotero-reading/INSTALL.md，为当前Agent安装zotero-reading并完成初始化检查”。Agent解压、确认原生技能目录并安装；支持Windows上的Codex、Claude Code、DeepSeek Harness及已明确技能目录的其他本地Agent。专用.cmd只是可选入口。安装后说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。缺Python、Zotero设置或目录不明时Agent确认所需操作。详见随包INSTALL.md和README.md。
 
 在[正式发行版](https://github.com/PDogan233/zotero-reading/releases/latest)下载完整skill.zip。仓库中的skills/zotero-reading是供构建的技能源目录，直接复制该子目录不包含完整运行时；安装使用Release附件。
 
@@ -33,6 +33,8 @@ zotero-reading start ABCDEFGH
 0.3.0起，说“检查zotero-reading有没有新版本”只查询；“把zotero-reading更新到最新正式版”才下载和替换。入口为run.ps1 skill-update check/apply，保持原ZOTERO_READING_HOME；发行文件有本地修改时先停止并确认，更新前备份、普通失败尝试恢复旧版，已有阅读成果不改写。
 
 默认公开来源为PDogan233/zotero-reading，更新器查询其最新正式Release；没有正式附件时会说明原因并保留旧版。旧0.2.1先用完整0.3.0包升级一次。发布者见[GitHub发布指南](RELEASING.md)。本版不做后台或自动更新。
+
+也可以说“从GitHub仓库PDogan233/zotero-reading更新到最新正式版，保留原数据目录”。更新后可在原对话要求Agent重读新版SKILL.md及阅读规则并继续；客户端无法发现更新时再刷新或新开会话。规则更新不会自动重写已有报告或Zotero笔记。
 
 ## 接续与迁移
 

@@ -9,7 +9,7 @@
 
 ## 新电脑首次使用
 
-推荐仅发送独立`zotero-reading-0.3.0-skill.zip`。接收方在自己的本地Agent中说“请读取这个ZIP中的zotero-reading/INSTALL.md，按说明为当前Agent安装zotero-reading并完成初始化检查”，Agent负责解压、核实技能目录与安装。支持Codex、Claude Code、DeepSeek Harness及明确自定义目录的其他本地Agent；目录不明时确认，不默认装进Codex。专用.cmd仅作可选手动入口。不要只复制SKILL.md，完整指引随包附带。
+推荐仅发送独立`zotero-reading-0.3.1-skill.zip`。接收方在自己的本地Agent中说“请读取这个ZIP中的zotero-reading/INSTALL.md，按说明为当前Agent安装zotero-reading并完成初始化检查”，Agent负责解压、核实技能目录与安装。支持Codex、Claude Code、DeepSeek Harness及明确自定义目录的其他本地Agent；目录不明时确认，不默认装进Codex。专用.cmd仅作可选手动入口。不要只复制SKILL.md，完整指引随包附带。
 
 打开本地Agent的新会话，说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。Agent运行setup，寻找已有Python 3.10+、复用或隔离安装PDF依赖，检查Zotero 10+。只有缺Python、Zotero未打开/未启用本机通信、权限或选文有歧义时才需要用户操作。笔记写入授权留到实际保存时，不提前申请。
 
@@ -34,6 +34,8 @@ zotero-reading paths
 0.3.0新增run.ps1 skill-update check/apply，分别查询和显式升级；正常阅读不自动联网更新。默认公开仓库PDogan233/zotero-reading，查询最新正式Release及其完整Skill附件。0.2.1需要先用完整新包升级一次，然后才能用该入口。更新保留ZOTERO_READING_HOME与已有本地数据，不自动更新阅读报告；修改过的技能文件先停下来确认。发布流程见公共源码包docs/RELEASING.md。
 
 各电脑的数据目录可以不同。例如另一电脑已改到Documents/Codex/ZoteroReading，就继续沿用，不因更新改回LocalAppData。数据目录无法创建/重命名时应先核对实际Agent权限，并确认可写位置；设置环境变量不会自动搬迁已有记录或扩大沙箱权限。
+
+更新后不必强制关闭原窗口：让Agent重新读取安装目录的SKILL.md、references/reading-workflow.md及报告格式说明，再接续本地讨论。客户端不能刷新/发现技能时才新开会话或重启；不同客户端的自动发现不能替代实际重读文件。旧报告不会自动按新规则重写，之后若用户要求修订仍先准备本地预览，明确保存才写Zotero。
 
 ## 同一Zotero账户换电脑
 
