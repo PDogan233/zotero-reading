@@ -12,7 +12,7 @@ from zotero_notes import Client, ZoteroError, default_data_root, friendly_error
 from reading_sessions import timestamp, write_json
 
 
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 PACKAGES = {"pypdf": "pypdf>=4,<7", "pypdfium2": "pypdfium2>=4,<6", "Pillow": "Pillow>=10,<13"}
 SCRIPTS = Path(__file__).resolve().parent
 

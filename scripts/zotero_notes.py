@@ -17,7 +17,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from reading_sessions import (RECORD_KINDS, ROLE_LABELS, citation_source, draft_from_records, item_key, managed_report,
+from reading_sessions import (RECORD_KINDS, ROLE_LABELS, citation_source, core_paragraphs, draft_from_records, item_key, managed_report,
                               capture_existing_note, normalized_doi, normalize_sessions, paper_children, paper_sources, pdf_snapshot, query_papers, session_sources,
                               read_json, read_save_mode, record_discussion, refresh_context, session_path,
                               set_save_mode, start_session, timestamp, write_json)
@@ -137,15 +137,13 @@ def validate_report(report, require_ready=False):
                 raise ValueError("报告来源中还有未读PDF。请完成阅读，或明确说明排除原因后再保存。")
     if not report["sections"]:
         raise ValueError("Report must contain sections")
-    core = report.get("core_idea")
-    if core is not None and (not isinstance(core, dict) or not isinstance(core.get("text"), str)):
-        raise ValueError("core_idea必须是包含text的段落对象。")
+    opening = core_paragraphs(report)
     modern = report.get("format_version", 1) >= 2 or "core_idea" in report
-    if require_ready and modern and (not core or not core["text"].strip()):
-        raise ValueError("请先在core_idea中填写本轮核对过的核心贡献或理念。")
-    if require_ready and core and core["text"].strip() and not (core.get("sources") or core.get("external_sources")):
-        raise ValueError("核心贡献或理念需要对应论文或已查证外部材料的来源定位。")
-    sections = report["sections"] + ([{"heading": "核心贡献或理念", "paragraphs": [core]}] if core and core["text"].strip() else [])
+    if require_ready and modern and (not opening or not any(not paragraph.get("quote") for paragraph in opening)):
+        raise ValueError("请先在core_idea中填写本轮核对过的核心贡献或理念，不能只有原文摘录。")
+    if require_ready and any(not (paragraph.get("sources") or paragraph.get("external_sources")) for paragraph in opening):
+        raise ValueError("核心贡献或理念的每段需要对应论文或已查证外部材料的来源定位。")
+    sections = report["sections"] + ([{"heading": "核心贡献或理念", "paragraphs": opening}] if opening else [])
     for section in sections:
         if not section["heading"] or not section["paragraphs"]:
             raise ValueError("Every section needs a heading and paragraphs")
@@ -191,9 +189,10 @@ def render_note(report):
     if report.get("format_version", 1) < 2 and "core_idea" not in report:
         # Keep saved legacy snapshots byte-compatible for resume/baseline checks.
         parts.append(f"<p>{escape(report.get('status', ''))}</p>")
-    core = report.get("core_idea")
-    if core and core["text"].strip():
-        parts += ["<h2>核心贡献或理念</h2>", render_paragraph(core, paper)]
+    opening = core_paragraphs(report)
+    if opening:
+        parts.append("<h2>核心贡献或理念</h2>")
+        parts.extend(render_paragraph(paragraph, paper) for paragraph in opening)
     if len(paper_sources(paper)) > 1:
         parts.append("<h2>阅读材料</h2>")
         for source in paper_sources(paper):
@@ -544,11 +543,11 @@ def autosave_preflight(report, report_path, data_root):
         return {"status": "autosave_disabled", "save_mode": saving, "action": "该范围仅讨论，不自动写入；显式save仍可保存本次。"}
     try:
         validate_report(report, require_ready=True)
-        if not report.get("core_idea") or not report["core_idea"]["text"].strip():
+        opening = core_paragraphs(report)
+        if not opening:
             raise ValueError("自动保存前请补充core_idea核心贡献或理念及来源。")
-        if not (report["core_idea"].get("sources") or report["core_idea"].get("external_sources")):
-            raise ValueError("核心贡献或理念需要来源定位。")
-        if any(paragraph["text"].startswith("待阅读后填写：") for section in report["sections"] for paragraph in section["paragraphs"]):
+        paragraphs = opening + [paragraph for section in report["sections"] for paragraph in section["paragraphs"]]
+        if any(paragraph["text"].startswith("待阅读后填写：") for paragraph in paragraphs):
             raise ValueError("报告还有未完成的模板段落，请完成本轮分析后再自动保存。")
         ensure_qa_merged(report, report_path)
     except ValueError as error:
@@ -588,7 +587,7 @@ def main():
     global AUTH_FILE
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", action="version", version="zotero-reading 0.4.0")
+    parser.add_argument("--version", action="version", version="zotero-reading 0.5.0")
     parser.add_argument("--data-dir", type=Path, help="会话和本机授权数据目录；也可设置ZOTERO_READING_HOME")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("probe")

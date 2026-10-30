@@ -84,12 +84,32 @@ def source_metadata(source):
     return result
 
 
+def core_paragraphs(report):
+    """Read the optional opening section without rewriting legacy snapshots."""
+    core = report.get("core_idea")
+    if core is None:
+        return []
+    if not isinstance(core, dict):
+        raise ValueError("core_idea必须是单段text或多段paragraphs对象。")
+    if "paragraphs" in core:
+        if any(name in core for name in ("text", "sources", "external_sources", "quote")):
+            raise ValueError("core_idea的paragraphs不能与顶层text/引用字段混用，请把引用放在对应段落。")
+        paragraphs = core["paragraphs"]
+        if not isinstance(paragraphs, list) or any(not isinstance(p, dict) or not isinstance(p.get("text"), str) or not p["text"].strip() for p in paragraphs):
+            raise ValueError("core_idea.paragraphs必须是包含非空text的段落列表。")
+        return paragraphs
+    if not isinstance(core.get("text"), str):
+        raise ValueError("core_idea必须包含text或paragraphs。")
+    return [core] if core["text"].strip() else []
+
+
 def bind_sources(report, sources, primary_key):
     paper = report["paper"]
     old_key = paper["attachment_key"]
     if len(sources) > 1 and len(paper_sources(paper)) == 1:
-        for citation in report.get("core_idea", {}).get("sources", []):
-            citation.setdefault("attachment_key", old_key)
+        for paragraph in core_paragraphs(report):
+            for citation in paragraph.get("sources", []):
+                citation.setdefault("attachment_key", old_key)
         for section in report["sections"]:
             for paragraph in section["paragraphs"]:
                 for citation in paragraph.get("sources", []):
@@ -490,7 +510,7 @@ def start_session(client, root, key, directory=None, pdf_key=None):
         existing = {"report_id": managed[1] if managed else "review-" + key,
                                   "note_title": "论文阅读报告：" + paper["title"], "date": datetime.now(HK).date().isoformat(),
                                   "format_version": 2, "draft": True,
-                                  "core_idea": {"text": "", "sources": []},
+                                  "core_idea": {"paragraphs": []},
                                   "paper": dict(paper, pdf_sha256=pdf["sha256"]),
                                   "sections": [
                                       {"heading": "1. 总结与动机分析", "paragraphs": [{"text": "待阅读后填写：概述问题和结果，说明前人做了什么、已有不足、本文解决了什么及证据支持到什么程度。用完整、平实的话解释并补原文证据。"}]},

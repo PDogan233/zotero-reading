@@ -33,7 +33,7 @@ def build(output, repository=UPDATE_REPOSITORY):
             archive.write(path, prefix + "/" + path.relative_to(ROOT).as_posix())
         public_readme = (ROOT / "docs/PUBLIC_README.md").read_text(encoding="utf-8")
         archive.writestr(prefix + "/README.md", public_readme.replace("](MIGRATION.md)", "](docs/MIGRATION.md)").replace("](RELEASING.md)", "](docs/RELEASING.md)").replace("](../prompts/", "](prompts/"))
-        archive.writestr(prefix + "/AGENTS.md", "论文阅读先读prompts/reading-workflow.md和skills/zotero-reading/SKILL.md。默认对接受该流程的用户每轮重要讨论后autosave，尊重仅讨论/暂停，安装更新不写文献笔记。核心理念放阅读日期下面，正文覆盖总结与动机、挑战与解决方法、优点与缺点；动机交代前人工作、不足及本文解决内容。中文平实完整，保留证据限定，不显示全局阶段标签。未读来源、草稿、所有权、并发和备份检查继续生效；每篇只维护一份专用笔记，保留其他笔记及旧保存快照。\n")
+        archive.writestr(prefix + "/AGENTS.md", "论文阅读先读prompts/reading-workflow.md和skills/zotero-reading/SKILL.md。默认对接受该流程的用户每轮重要讨论后autosave，尊重仅讨论/暂停，安装更新不写文献笔记。阅读日期下面的核心贡献或理念应可独立讲清论文主要工作、设计依据和关键取舍，保留必要技术细节与短摘录，按需联系问题、已有方案、改动和结果，不固定顺序或段数；多段用core_idea.paragraphs，旧text兼容。后文总结与动机、挑战与解决方法、优点与缺点三模块继续展开证据，避免逐句重复。首次完整阅读，复盘先读旧报告并按需回查，不自动重做全文或虚标已读。源码可直接用，不依赖全局安装，更新器不覆盖私人源码。中文平实完整，保留证据限定，不显示全局阶段标签。未读来源、草稿、所有权、并发和备份检查继续生效；每篇只维护一份专用笔记，保留其他笔记及旧保存快照。\n")
     payload = {"SKILL.md": (skill_root / "SKILL.md").read_text(encoding="utf-8").replace(
         "](../../prompts/reading-workflow.md)", "](references/reading-workflow.md)").replace(
         "](../../docs/MIGRATION.md)", "](references/MIGRATION.md)").encode("utf-8"),
