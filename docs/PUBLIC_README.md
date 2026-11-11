@@ -8,7 +8,7 @@
 
 ## 安装与运行
 
-推荐独立zotero-reading-0.5.1-skill.zip：把实际文件路径交给本地Agent，说“根据这个ZIP中的zotero-reading/INSTALL.md，为当前Agent安装zotero-reading并完成初始化检查”。Agent解压、确认原生技能目录并安装；支持Windows上的Codex、Claude Code、DeepSeek Harness及已明确技能目录的其他本地Agent。专用.cmd只是可选入口。安装后说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。缺Python、Zotero设置或目录不明时Agent确认所需操作。详见随包INSTALL.md和README.md。
+推荐独立zotero-reading-0.5.2-skill.zip：把实际文件路径交给本地Agent，说“根据这个ZIP中的zotero-reading/INSTALL.md，为当前Agent安装zotero-reading并完成初始化检查”。Agent解压、确认原生技能目录并安装；支持Windows上的Codex、Claude Code、DeepSeek Harness及已明确技能目录的其他本地Agent。专用.cmd只是可选入口。安装后说“根据zotero-reading帮我看《论文标题》并生成阅读报告”。缺Python、Zotero设置或目录不明时Agent确认所需操作。详见随包INSTALL.md和README.md。
 
 在[正式发行版](https://github.com/PDogan233/zotero-reading/releases/latest)下载完整skill.zip。仓库中的skills/zotero-reading是供构建的技能源目录，直接复制该子目录不包含完整运行时；安装使用Release附件。
 
