@@ -36,6 +36,8 @@ setup返回data_dir。安装版默认使用Windows当前用户的LocalAppData/Zo
 
 用户例如“根据zotero-reading帮我看《论文标题》并生成阅读报告”。默认完成分析、预览及自动保存，无需逐轮问是否保存；用户说先不保存/只讨论时改为该论文manual。候选、PDF、版本/正文身份不明时仍需确认，不为实时而省略核对。
 
+用户要求升级已有报告时，先读[旧报告增量升级](references/report-upgrades.md)，按纯格式修改、局部内容补充或内容重审选择最小处理范围；只把需要判断的差异交给模型。普通首次阅读不加载该指南。
+
 1. 读[阅读规则](../../prompts/reading-workflow.md)；安装发布包内同一规则位于references/reading-workflow.md。
 2. 运行入口find '标题/作者'、find --doi 'DOI'或recent日期筛选。核对候选，start <主条目或PDF key>建立/接续会话；同父条目所有PDF自动纳入。不要凭文件名断定是正文或补充。
 3. 先读context.md、report.json、records.json和已有discussion.md；已有报告的复盘还读existing-note.html、report.saved.json（存在时），保留尚未保存的讨论。缺本地缓存可按旧笔记恢复其包含的成果，不能声称恢复所有原JSON字段或未保存问答。
